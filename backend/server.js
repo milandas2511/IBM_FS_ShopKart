@@ -13,16 +13,35 @@ const connectDB = require("./config/db");
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://ibm-fs-shopkart-u238.onrender.com",
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "https://ibm-fs-shopkart-u238.onrender.com",
+    origin: function (origin, callback) {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
   })
 );
 
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
+  res.json({
+    status: "ok",
+    message: "ShopKart API is running",
+  });
 });
 
 app.use("/api/auth", require("./routes/auth"));
